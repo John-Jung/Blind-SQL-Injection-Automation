@@ -39,7 +39,7 @@ url = 'URL and {}'
 ```
 ## 스크립트 실행
 ```bash
-python script.py
+python answer.py
 ```
 스크립트가 데이터를 추출하기 시작하고 각 테이블의 데이터를 tables 디렉토리 아래의 개별 Excel 파일에 저장합니다. 각 Excel 파일은 테이블 이름으로 명명된 시트를 포함하며 데이터베이스에서 추출된 행과 열을 포함합니다.
 
