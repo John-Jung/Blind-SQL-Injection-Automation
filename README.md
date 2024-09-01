@@ -58,6 +58,8 @@ python answer.py
 EUC-KR: 16비트
 UTF-8: 24비트
 
+해당 DB는 UTF-8로 인코딩 되어 있었다.
+
 
 ### ASCII 범위 외 문자 처리
 
@@ -87,6 +89,10 @@ def get_char_value(query):
     return chr(ascii_val)
 ```
 
+여기서 가장 중요한것은 **max_val=15572643** 이다. 이숫자는 UTF-8을 ord로 표현하여 한글이 표현되는 범위이다. 
+
+자세한 설명은 맨 하단 참고 링크를 참조
+
 이 함수는 SQL 인젝션을 통해 탐색된 ASCII 값을 바탕으로 문자를 구하는 함수
 
 1. BinarySearch 함수를 통해 ASCII 값을 탐색한다.
@@ -101,3 +107,5 @@ def get_char_value(query):
 
 ## 관련 게시물
 https://velog.io/@wearetheone/%EB%AA%A8%EC%9D%98%ED%95%B4%ED%82%B9-%EC%88%98%EC%97%85-%EB%AA%A8%EB%93%88%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-2-%ED%95%9C%EA%B8%80-%EC%9D%B8%EC%BD%94%EB%94%A9
+
+https://linarena.github.io/web_0x04
