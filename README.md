@@ -51,5 +51,53 @@ python answer.py
 - <b>타임아웃</b>: 타임아웃이 발생하면 스크립트는 자동으로 요청을 재시도합니다.
 - <b>권한 오류</b>: 파일 저장 시 권한 오류가 발생하면 스크립트가 오류 메시지를 기록합니다.
 
+## 한글 인코딩
+
+특이사항으로는 글자를 추출할때 영어는 기본적으로 0-127까지 아스키코드를 사용하여 추출하면 되지만 한글이 식별이 상당히 까다로웠다. 한글 입력값들이 기본적으로 euc-kr 혹은 utf-8로 인코딩 되어 있다. 그럼 그들의 차이가 뭘까?
+
+EUC-KR: 16비트
+UTF-8: 24비트
+
+
+### ASCII 범위 외 문자 처리
+
+코드는 기본적으로 ASCII 문자(0~127 범위)를 처리하는 방식으로 설계되어있다. 그러나 한글은 이 범위를 벗어나는 문자로, UTF-8 인코딩에서 3바이트로 표현됩니다. ASCII 범위 외의 문자를 다루기 위해 코드에서는 한글 등 비ASCII 문자의 인코딩/디코딩 처리를 추가로 수행
+
+
+### 한글 인코딩 처리 함수: insertPecsent
+
+>
+```python
+def insertPecsent(s):
+    return '%' + s[:2] + '%' + s[2:4] + '%' + s[4:6]
+```
+
+이 함수는 한글을 URL 인코딩 형식(%E3%84%A4)으로 변환하기 위해 사용된다. UTF-8로 인코딩된 한글은 16진수로 표현되며, 이 함수는 각 바이트를 %XX 형태로 변환한다.
+
+### 한글 처리 로직: get_char_value 함수
+
+>
+```python
+def get_char_value(query):
+    ascii_val = BinarySearch(query, max_val=15572643)
+    if ascii_val > 127:  # 한글 범위에서 탐색 필요
+        hex_ascii_character = hex(ascii_val).replace("0x", "")
+        encoded_hangeul = insertPecsent(str(hex_ascii_character))
+        return parse.unquote(encoded_hangeul)
+    return chr(ascii_val)
+```
+
+이 함수는 SQL 인젝션을 통해 탐색된 ASCII 값을 바탕으로 문자를 구하는 함수
+
+1. BinarySearch 함수를 통해 ASCII 값을 탐색한다.
+
+2. 탐색된 값이 127보다 크면, 이 값은 한글이거나 다른 비ASCII 문자일 가능성이 큽니다. 이 경우 해당 값을 16진수로 변환하고 insertPecsent 함수를 통해 URL 인코딩 형식으로 변환한다.
+
+3. 변환된 값은 parse.unquote 함수를 통해 실제 한글로 디코딩된다.
+
+### URL 인코딩/디코딩
+
+**'**parse.unquote**'** 함수는 URL 인코딩된 문자열을 원래 문자로 변환하는 데 사용됩니다. 예를 들어, '%E3%85%85'와 같은 인코딩된 문자열은 디코딩되어 한글 문자가 된다.
+
 ## 관련 게시물
 https://velog.io/@wearetheone/%EB%AA%A8%EC%9D%98%ED%95%B4%ED%82%B9-%EC%88%98%EC%97%85-%EB%AA%A8%EB%93%88%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-2-%ED%95%9C%EA%B8%80-%EC%9D%B8%EC%BD%94%EB%94%A9
